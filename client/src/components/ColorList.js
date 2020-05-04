@@ -20,7 +20,7 @@ const ColorList = ({ colors, updateColors }) => {
     window.location.reload(false)
   }
 
-  const saveEdit = (e, color) => {
+  const saveEdit = (e) => {
     e.preventDefault();
     // Make a put request to save your updated color
     // think about where will you get the id from...
