@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { axiosWithAuth } from './axiosWithAuth';
 
 const initialColor = {
   color: "",
@@ -10,22 +10,54 @@ const ColorList = ({ colors, updateColors }) => {
   console.log(colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
+  const [colorToAdd, setColorToAdd] = useState(initialColor)
 
   const editColor = color => {
     setEditing(true);
     setColorToEdit(color);
   };
 
-  const saveEdit = e => {
+  const refreshPage = () => {
+    window.location.reload(false)
+  }
+
+  const saveEdit = (e) => {
     e.preventDefault();
     // Make a put request to save your updated color
     // think about where will you get the id from...
     // where is is saved right now?
+
+    axiosWithAuth()
+      .put(
+        `http://localhost:5000/api/colors/${colorToEdit.id}`, colorToEdit
+      )
+      .then(res => {
+        console.log(res)
+        refreshPage()
+      })
+      .catch(err => console.log(err))
   };
 
   const deleteColor = color => {
     // make a delete request to delete this color
+
+    axiosWithAuth()
+      .delete(`http://localhost:5000/api/colors/${color.id}`)
+      .then(res => {
+        console.log('deleted', res)
+        refreshPage()
+      })
+      .catch(err => console.error(err))
   };
+
+  const addColor = () => {
+    axiosWithAuth()
+      .post('http://localhost:5000/api/colors', colorToAdd)
+      .then(res => {
+        console.log(res)
+      })
+      .catch(err => console.error(err))
+  }
 
   return (
     <div className="colors-wrap">
@@ -82,6 +114,33 @@ const ColorList = ({ colors, updateColors }) => {
       )}
       <div className="spacer" />
       {/* stretch - build another form here to add a color */}
+      <form onSubmit={addColor}>
+          <legend>edit color</legend>
+          <label>
+            color name:
+            <input
+              onChange={e =>
+                setColorToAdd({ ...colorToAdd, color: e.target.value })
+              }
+              value={colorToAdd.color}
+            />
+          </label>
+          <label>
+            hex code:
+            <input
+              onChange={e =>
+                setColorToAdd({
+                  ...colorToAdd,
+                  code: { hex: e.target.value }
+                })
+              }
+              value={colorToAdd.code.hex}
+            />
+          </label>
+          <div className="button-row">
+            <button type="submit">Add Color</button>
+          </div>
+        </form>
     </div>
   );
 };
